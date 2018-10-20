@@ -2,7 +2,7 @@ const PeopleModel = require('../models/people');
 const TagModel = require('../models/tags');
 const ImportedFileModel = require('../models/importedFiles');
 const _ = require('lodash');
-
+const request = require('request');
 
 
 exports.createPerson = async (req, res, next) => {
@@ -28,8 +28,7 @@ exports.createPerson = async (req, res, next) => {
 };
 
 exports.import = async(req, res, next) => {
-    const file = require('../../dataservice/people');
-    const filePath = 'people.json';
+    const filePath = 'http://dataservice/people.json';
 
     // check idempotency key
     const impFile = await ImportedFileModel.findOne({file_path: filePath }).catch((err) => {
@@ -41,6 +40,27 @@ exports.import = async(req, res, next) => {
     if (!_.isEmpty(impFile)){
         return res.status(202).json({data: {count: 0}, status: 'success', message: 'file already been imported'});
     }
+
+    // read file
+    let file = null;
+    const p = new Promise(function(resolve, reject){
+        request.get(filePath, (error, response, body) => {
+            if(!error && response.statusCode == 200) {
+                resolve(JSON.parse(body));
+            }
+            else{
+                reject('failed to load file');
+            }
+        })
+    });
+
+    try {
+        file = await p;
+    }
+    catch(error){
+        return res.status(500).json({status: 'failed', message: 'file not exist'})
+    }
+
 
     let tags = {};
 

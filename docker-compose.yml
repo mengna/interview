@@ -16,3 +16,8 @@ services:
     image: 'mongo'
     ports:
       - 27017:27017
+  dataservice:
+    image: 'dataservice'
+    build: ./dataservice
+    ports:
+    - 80:80
