@@ -110,7 +110,13 @@ exports.getPersonById = async(req, res, next) => {
 };
 
 exports.getPeopleByGender = async(req, res, next) => {
-    const people = await PeopleModel.find(req.query).catch((err) => {
+    const query = req.query;
+
+    if(!query.gender || query.gender.toLowerCase() != 'male' && query.gender.toLowerCase() != 'female' ){
+        return next({status: 601, message: 'invalid query'});
+    }
+
+    const people = await PeopleModel.find(query).catch((err) => {
         if(err) {
             return next({status: 601, message: err.message});
         }
