@@ -115,7 +115,7 @@ exports.getPeopleByGender = async(req, res, next) => {
         return next({status: 601, message: 'invalid request, no query found'});
     }
     else{
-        gender = query.gender.toLowerCase();
+        gender = req.query.gender.toLowerCase();
         if(gender != 'male' && gender != 'female'){
             return next({status: 601, message: 'invalid gender query'})
         }
