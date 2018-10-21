@@ -32,10 +32,6 @@ const peopleSchema = new Schema({
     }
 }, { versionKey: false });
 
-peopleSchema.pre('validate', function(next) {
-    keyConversionUtil.camelCaseToSnakeCase(this);
-    next();
-});
 
 peopleSchema.post('findOne', function(doc) {
     if(_.get(doc, '_doc')) {

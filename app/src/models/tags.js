@@ -16,10 +16,6 @@ const tagsSchema = new Schema({
     }
 }, { versionKey: false });
 
-tagsSchema.pre('validate', function(next) {
-    keyConversionUtil.camelCaseToSnakeCase(this);
-    next();
-});
 
 tagsSchema.post('find', function(doc) {
     _.forEach(doc, (item) => {

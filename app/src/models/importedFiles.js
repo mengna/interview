@@ -11,10 +11,6 @@ const importedFilesSchema = new Schema({
     }
 }, { versionKey: false });
 
-importedFilesSchema.pre('validate', function(next) {
-    keyConversionUtil.camelCaseToSnakeCase(this);
-    next();
-});
 
 importedFilesSchema.post('findOne', function(doc) {
     if(_.get(doc, '_doc')) {

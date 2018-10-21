@@ -1,6 +1,7 @@
 const PeopleModel = require('../models/people');
 const TagModel = require('../models/tags');
 const ImportedFileModel = require('../models/importedFiles');
+const keyConversionUtil = require('../utilities/keyConvertionUtil');
 const _ = require('lodash');
 const request = require('request');
 
@@ -38,10 +39,15 @@ exports.import = async(req, res, next) => {
         return res.status(500).json({status: 'failed', message: 'file not exist'})
     }
 
+    // convert camel case to snake case
+    let formatedFile = [];
+    _.forEach(file, (item) => {
+        formatedFile.push(keyConversionUtil.camelCaseToSnakeCase(item));
+    });
 
     let tags = {};
 
-    _.forEach(file, (item) => {
+    _.forEach(formatedFile, (item) => {
         _.forEach(item.tags, (tag) => {
             if(!_.has(tags, tag)){
                 tags[tag] = 0;
@@ -64,7 +70,7 @@ exports.import = async(req, res, next) => {
         }
     });
 
-    const insertedPeople = await PeopleModel.insertMany(file).catch((err) => {
+    const insertedPeople = await PeopleModel.insertMany(formatedFile).catch((err) => {
         if (err){
             return next({status: 601, message: err.message});
         }
