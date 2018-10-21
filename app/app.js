@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-mongoose.connect('mongodb://mongo:27017/my_test', { useNewUrlParser: true });
+mongoose.connect('mongodb://mongo:27017/interviews', { useNewUrlParser: true });
 
 const db = mongoose.connection;
 
