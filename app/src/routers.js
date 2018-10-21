@@ -8,11 +8,6 @@ module.exports = (app) => {
     app.get('/myapp/check', messages.checkStatus);
 
     app.post(
-        '/myapp/v1.0/newpersopn',
-        people.createPerson
-    );
-
-    app.post(
         '/myapp/v1.0/import',
         countAPIs,
         verifyToken,

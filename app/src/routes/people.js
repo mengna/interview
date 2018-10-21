@@ -4,29 +4,6 @@ const ImportedFileModel = require('../models/importedFiles');
 const _ = require('lodash');
 const request = require('request');
 
-
-exports.createPerson = async (req, res, next) => {
-    const body = req.body;
-
-    const personData = {
-        is_active: body.is_active,
-        age: body.age,
-        eye_color: body.eye_color,
-        name: body.name,
-        gender: body.gender,
-        tags: body.tags
-    };
-
-    const newPerson = new PeopleModel(personData);
-    newPerson.save().catch((err)=>{
-        if(err){
-            return next({status: 601, message: err.message});
-        }
-    });
-
-    return res.status(200).json({status: 'success', message: 'new person created'});
-};
-
 exports.import = async(req, res, next) => {
     const filePath = 'http://dataservice/people.json';
 
