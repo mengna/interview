@@ -6,5 +6,5 @@ exports.login = async (req, res, next) => {
 
     const token = GenerateToken({username: username});
 
-    return res.status(200).json({token: token, status: 'success', message: 'login success'});
+    return res.status(200).json(token);
 };

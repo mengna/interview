@@ -11,12 +11,12 @@ exports.import = async(req, res, next) => {
     // check idempotency key
     const impFile = await ImportedFileModel.findOne({file_path: filePath }).catch((err) => {
         if(err) {
-            return next({status: 601, message: err.message});
+            return next({status: 422, message: err.message});
         }
     });
 
     if (!_.isEmpty(impFile)){
-        return res.status(202).json({data: {count: 0}, status: 'success', message: 'file already been imported'});
+        return res.status(202).json({count: 0});
     }
 
     // read file
@@ -36,7 +36,7 @@ exports.import = async(req, res, next) => {
         file = await p;
     }
     catch(error){
-        return res.status(500).json({status: 'failed', message: 'file not exist'})
+        return next({status: 500, message: 'failed to load file'})
     }
 
     // convert camel case to snake case
@@ -66,31 +66,31 @@ exports.import = async(req, res, next) => {
 
     TagModel.insertMany(tagsList).catch((err) => {
         if (err){
-            return next({status: 601, message: err.message});
+            return next({status: 422, message: err.message});
         }
     });
 
     const insertedPeople = await PeopleModel.insertMany(formatedFile).catch((err) => {
         if (err){
-            return next({status: 601, message: err.message});
+            return next({status: 422, message: err.message});
         }
     });
 
     const newKey = new ImportedFileModel({file_path: filePath});
     newKey.save().catch((err)=>{
         if(err){
-            return next({status: 601, message: err.message});
+            return next({status: 422, message: err.message});
         }
     });
 
-    return res.status(200).json({data: {count: insertedPeople.length}, status: 'success', message: 'import data success'});
+    return res.status(200).json({count: insertedPeople.length});
 };
 
 exports.getTags = async(req, res, next) => {
 
     const tagCount = await TagModel.find({}).select(['-_id', 'tag_name', 'count']).catch((err)=>{
         if(err){
-            return next({status: 601, message: err.message});
+            return next({status: 422, message: err.message});
         }
     });
 
@@ -100,7 +100,7 @@ exports.getTags = async(req, res, next) => {
         tags[tag.tagName] = tag.count;
     });
 
-    return res.status(200).json({data: tags, status: 'success', message: 'get tags success'});
+    return res.status(200).json(tags);
 };
 
 exports.getPersonById = async(req, res, next) => {
@@ -108,30 +108,33 @@ exports.getPersonById = async(req, res, next) => {
 
     const person = await PeopleModel.findOne({_id: userId}).catch((err) => {
         if(err){
-            return next({status: 601, message: err.message});
+            return next({status: 422, message: err.message});
         }
     });
 
-    return res.status(200).json({data: person, status: 'success', message: 'get person by id success'});
+    return res.status(200).json(person);
 };
 
 exports.getPeopleByGender = async(req, res, next) => {
     let gender = '';
-    if(!req.query || !req.query.gender){
-        return next({status: 601, message: 'invalid request, no query found'});
-    }
-    else{
-        gender = req.query.gender.toLowerCase();
-        if(gender != 'male' && gender != 'female'){
-            return next({status: 601, message: 'invalid gender query'})
+    if (!_.isEmpty(req.query)){
+        if(req.query.gender){
+            gender = req.query.gender.toLowerCase();
+            if(gender != 'male' && gender != 'female'){
+                return next({status: 422, message: 'invalid gender query'})
+            }
+        }
+        else{
+            return next({status: 422, message: 'invalid gender query'})
         }
     }
+    const query = gender ? {gender: gender} : {};
 
-    const people = await PeopleModel.find({gender: gender}).catch((err) => {
+    const people = await PeopleModel.find(query).catch((err) => {
         if(err) {
-            return next({status: 601, message: err.message});
+            return next({status: 422, message: err.message});
         }
     });
 
-    return res.status(200).json({data: people, status: 'success', message: 'get people by gender success'});
+    return res.status(200).json(people);
 };
